@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\PembelianResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\PembelianResource\RelationManagers;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Set;
 
 class PembelianResource extends Resource
@@ -28,6 +29,10 @@ class PembelianResource extends Resource
     {
         return $form
             ->schema([
+                DatePicker::make('tanggal')
+                    ->label('tanggal pembelian')
+                    ->required()
+                    ->default(now()),
                 Select::make('supplier_id')
                     ->options(
                         \App\Models\Supplier::pluck('nama_perusahaan', 'id')

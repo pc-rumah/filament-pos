@@ -47,6 +47,9 @@ class BarangResource extends Resource
                         'kg' => 'Kg',
                         'liter' => 'Liter',
                     ]),
+                TextInput::make('harga')
+                    ->required()
+                    ->type('number'),
             ]);
     }
 
@@ -59,6 +62,7 @@ class BarangResource extends Resource
                 TextColumn::make('kategori_barang'),
                 TextColumn::make('stok_barang'),
                 TextColumn::make('satuan'),
+                TextColumn::make('harga'),
             ])
             ->filters([
                 //
