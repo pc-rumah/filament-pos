@@ -11,7 +11,9 @@ use App\Models\Pembelian;
 use Filament\Tables\Table;
 use App\Models\PembelianItem;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
+
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -19,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\PembelianItemResource\Pages;
 use App\Filament\Resources\PembelianItemResource\RelationManagers;
+use Filament\Forms\Get;
 
 class PembelianItemResource extends Resource
 {
@@ -35,46 +38,63 @@ class PembelianItemResource extends Resource
 
         return $form
             ->schema([
-                Forms\Components\DatePicker::make('tanggal')
-                    ->required()
-                    ->label('Tanggal Pembelian')
-                    ->default($pembelian->tanggal)
-                    ->disabled(),
-                TextInput::make('supplier_id')
-                    ->label('Nama Supplier')
-                    ->required()
-                    ->disabled()
-                    ->default($pembelian->supplier?->nama),
+                Grid::make()
+                    ->schema([
+                        Forms\Components\DatePicker::make('tanggal')
+                            ->required()
+                            ->label('Tanggal Pembelian')
+                            ->default($pembelian->tanggal)
+                            ->disabled(),
+                        TextInput::make('supplier_id')
+                            ->label('Nama Supplier')
+                            ->required()
+                            ->disabled()
+                            ->default($pembelian->supplier?->nama),
 
-                TextInput::make('email')
-                    ->label('Email Supplier')
-                    ->required()
-                    ->disabled()
-                    ->default($pembelian->supplier?->email),
+                        TextInput::make('email')
+                            ->label('Email Supplier')
+                            ->required()
+                            ->disabled()
+                            ->default($pembelian->supplier?->email),
 
-                Select::make('barang_id')
-                    ->label('Nama Barang')
-                    ->required()
-                    ->options(
-                        Barang::all()->pluck('nama_barang', 'id')
-                    )
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, Set $set) {
-                        $barang = Barang::find($state);
-                        $set('harga', $barang->harga ?? null);
-                    }),
+                        Select::make('barang_id')
+                            ->label('Nama Barang')
+                            ->required()
+                            ->options(
+                                Barang::all()->pluck('nama_barang', 'id')
+                            )
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                $barang = Barang::find($state);
+                                $set('harga', $barang->harga ?? null);
+                                $jumlah = $get('jumlah');
+                                $total = $jumlah * $barang->harga;
+                                $set('total', $total);
+                            }),
 
-                TextInput::make('jumlah')
-                    ->label('Jumlah Barang')
-                    ->required(),
+                        TextInput::make('harga')
+                            ->label('Harga Barang')
+                            ->required(),
 
-                TextInput::make('harga')
-                    ->label('Harga Barang')
-                    ->required(),
+                        TextInput::make('jumlah')
+                            ->label('Jumlah Barang')
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                $jumlah = $state;
+                                $harga = $get('harga');
+                                $total = $jumlah * $harga;
+                                $set('total', $total);
+                            }),
+
+                        TextInput::make('total')
+                            ->disabled()
+                            ->label('Total Pembelian'),
 
 
-                Hidden::make('pembelian_id')
-                    ->default(request('pembelian_id'))
+                        Hidden::make('pembelian_id')
+                            ->default(request('pembelian_id'))
+                    ])->columns(3),
             ]);
     }
 

@@ -58,8 +58,13 @@ class PembelianResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('pelanggan_id')->searchable(),
-                Tables\Columns\TextColumn::make('tanggal')->searchable(),
+                Tables\Columns\TextColumn::make('supplier.nama_perusahaan')
+                    ->searchable()
+                    ->label('Nama Perusahaan'),
+                Tables\Columns\TextColumn::make('supplier.nama')
+                    ->searchable()
+                    ->label('Nama Kontak'),
+                Tables\Columns\TextColumn::make('tanggal')->dateTime('d F Y'),
             ])
             ->filters([
                 //
